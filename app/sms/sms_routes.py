@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
+from datetime import datetime
 from twilio.twiml.messaging_response import MessagingResponse
 from pprint import pprint
 
 from . import sms_bp
+from .functions.Scheduler import Scheduler
 
 @sms_bp.route("/", methods=["GET", "POST"])
 def home():
@@ -35,7 +37,7 @@ def home():
 
     resp = MessagingResponse()
 
-    resp.message("fuck off?")
+    resp.message("HI :)")
 
     # this is the whole of the data that is sent in the request
     #pprint(request.form)
@@ -45,3 +47,9 @@ def home():
 
     #return jsonify(apiResp)
     return str(resp)
+
+@sms_bp.route('/rq')
+def schedule():
+    # probably do some stuff here to make sure it's a valid request.
+    print(request.form['body'])
+    print('finished request ops')
