@@ -4,7 +4,9 @@ from twilio.twiml.messaging_response import MessagingResponse
 from pprint import pprint
 
 from . import sms_bp
-from .functions.Scheduler import Scheduler
+#from .functions.Scheduler import Scheduler
+from .functions.Parser import Parser
+import app
 
 @sms_bp.route("/", methods=["GET", "POST"])
 def home():
@@ -48,8 +50,29 @@ def home():
     #return jsonify(apiResp)
     return str(resp)
 
+@sms_bp.route("/t", methods=["GET", "POST"])
+def test():
+    app.post('/rq', data=dict(body='+ @12:00 "Get coffee" #1234567899'))
+
 @sms_bp.route('/rq')
 def schedule():
-    # probably do some stuff here to make sure it's a valid request.
-    print(request.form['body'])
+    #rq = request.form['body']
+    rq = '- @12:00 "Get coffee" #1234567899'
+    if Parser.requestIsValid(rq):
+        if Parser.getType(rq) == 'add':
+            return 'add'
+        elif Parser.getType(rq) == 'remove':
+            return 'remove'
+        elif Parser.getType(rq) == 'info':
+            return 'info'
+        elif Parser.getType(rq) == 'help':
+            return 'help'
+        else:
+            return 'none'
+        # handle the task based on type from Parser.getType()
+            # if 'add': schedule add (build this in the scheduler) and send message.
+    else:
+        return 'invalid request received'
+    # Handler picks up the *valid* request
+    print(rq)
     print('finished request ops')

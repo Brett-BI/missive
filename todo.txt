@@ -75,26 +75,50 @@ Check that the service is running
 - <reminder>
 Remove the active reminder from the list (by ID)
 
+'''
+scheduler_bp
+    > this needs methods that are not necessarily tied to routes at the moment
+    > handles all scheduling tasks and processes
+    > includes the web interface for managing scheduling/tasks/processes (not the same as the interface for users)
+    > Functionality:
+        - Add job
+        - Remove job
+        - Update job
+        - View all jobs
+        - Search jobs
+'''
 
-Approach:
-classes
-    - top-level request
-        # meta information (to, from, msg, etc.; basically the info in the Twilio request)
-            - getters & setters
-        # have children inherit the basic information and extend for all other functionality (except a few, maybe?)
-    - (+) add reminder (inherits from request)
-        - import the parser
-        - methods for each action (might have to work out overloading methods)
-    - (?) information reminder (inherits from request)
-    - (-) remove reminder (inherits from request)
-    - (!) display reminder (inherits from request)
-    - top level parser
-        # various methods for extracting information from message bodies
-# request handler
-    # invokes +/-/? classes
-# error handler
-    # does Flask have enough of this functionality baked in? Is it better to handle errors within each module (probably)?
-# DB handler
-    # handles all the DB storage for incoming/outgoing messages, reminders, etc.
-# send message handler
-    # handles all of the sms messaging
+todo:
+# scheduler
+    > functionality (add, remove, update, view all, calculate time, etc.)
+    > admin front-end
+    > user front-end
+        - the user will be creating jobs directly so the information doesn't have to be parsed in the same way the text messages do
+# messenger
+    > figure out security with Twilio services (so that info from this endpoint gets to Twilio in a secure way)
+# sms request handler (handler + parser)
+    > figure out security with Twilio (to make sure that only Twilio can send stuff to this endpoint)
+# parser
+    > ? functionality
+    > figure out how to handle datetimes? (syntax that isn't stupid, maybe have strftime figure it out?)
+# database for job store
+# database for message/request info
+
+Add support for time/datetime strings based on regex parsing:
+# regex looks for time patterns: xx:xx || x:xx || x || x:xx:xxx || x:xx.xxx and matches them to an strptime format string
+    > if regex doesn't find anything, the user's time format isn't supported, throw an error or something
+    > if regex does find something, pass a list of dicts: [{time_string: '12', format:'%H'}]
+
+scheduler is going to pull from the DB so there has to be a few tables, at least:
+# missives
+    > missive_id, requester_id (required to sign up to send messages), request_datetime, status
+# missive_statuses
+    > status_id, status_name, status_desc
+# users
+    > user_id, name, email, phone_number
+# messages
+    > message_id, missive_id, message
+# times
+    > time_id, missive_id, time (attach a timezone to this?)
+# scheduled tasks (not sure how this one is going to work)
+    > task_id, status
