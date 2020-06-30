@@ -1,26 +1,26 @@
 from abc import ABC, abstractmethod
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class Parser():
-    def __init__(self):
+    def __init__(self, msg_body: str):
+        self.msg_body = msg_body
+
+    def getElements(self):
         pass
 
-    def getElements(msg_body):
-        pass
-
-    def getMessage(msg_body):
+    def getMessage(self):
         messages = []
-        split_messages = re.findall(r'(\"[^\"]*\")', msg_body)
+        split_messages = re.findall(r'(\"[^\"]*\")', self.msg_body)
 
         for r in split_messages:
             messages.append(r.strip())
 
         return messages
 
-    def getRecipients(msg_body):
+    def getRecipients(self):
         recipients = []
-        split_recipients = re.findall(r'(#\d+)', msg_body)
+        split_recipients = re.findall(r'(#\d+)', self.msg_body)
 
         for r in split_recipients:
             recipients.append(r.strip(' #'))
@@ -28,64 +28,103 @@ class Parser():
         return recipients
 
     # make sure that this returns a datetime object (all calculations go here for now)
-    def getTimes(msg_body: str) -> [datetime]:
+    def getTimes(self) -> [datetime]:
         times = []
         # parse time elements
-        split_times = re.findall(r'(@\d+:\d+\s*\w*)', msg_body)
+        split_times = re.findall(r'(@\d+:?\d+\s*\w*)', self.msg_body)
 
         # get datetimes from time elements
         for t in split_times:
             try:
-                Parser.convertStringToDateTime(t)
+                _time = self.convertStringToDateTime(t.strip().replace('@', ''))
+                if _time:
+                    times.append(_time)
             except CouldNotConvertToDateTimeError as e:
                 print(e.message)
         # add to times
 
-        for t in split_times:
-            times.append(t.strip(' @'))
+        # for t in split_times:
+        #     times.append(t.strip(' @'))
+
+        print('ALL TIMES:')
 
         return times
     
-    def convertStringToDateTime(dt: str) -> datetime:
+    def convertStringToDateTime(self, dt: str) -> datetime:
         # regex match dt to a format string
-        rg = findRegexMatch(dt)
+        rg = self.getStrptimeFormatString(dt)
+        print(f'dt: {dt}')
+        print(f'rg: {rg}')
         # apply format string to strftime (or may strptime, whichever one)
-        # calculate that DateTime within the next 24 hours
+        if rg:
+            _time = datetime.strptime(dt, rg)
+            print(datetime.strptime(dt, rg))
+            if (datetime.today().hour >= _time.hour) and (datetime.today().minute >= _time.minute):
+                print('time has past. do it tomorrow.')
+                _dt = datetime(datetime.today().year, datetime.today().month, datetime.today().day, _time.hour, _time.minute, 0) + timedelta(days=1)
+                return _dt
+            else:
+                print('there is still time today...')
+                _dt = datetime(datetime.today().year, datetime.today().month, datetime.today().day, _time.hour, _time.minute, 0)
+                return _dt
+            #calc hour/day: current day or next day?
+        else:
+            raise CouldNotConvertToDateTimeError(dt)
         # return a DateTime
-        raise CouldNotConvertToDateTimeError('dt_string_here')
+        
 
-    def findRegexMatch(dt: str) -> str:
+    def getStrptimeFormatString(self, dt: str) -> str:
         # dict where the key is the regex and value is the format string
-        rg_dict = {'^0?(1|2|3|4|5|6|7|8|9|10|11|12)(:\d\d)\s?(a|p|am|pm|AM|PM|a.m.|p.m.|A.M.|P.M.)$':''}
+        rg_dict = {
+            r'^0?(1|2|3|4|5|6|7|8|9|10|11|12)(:\d\d)\s(a|p|am|pm|AM|PM)$':'%I:%M %p',
+            r'^0?(1|2|3|4|5|6|7|8|9|10|11|12)(:\d\d)(a|p|am|pm|AM|PM)$':'%I:%M%p',
+            r'^0?(1|2|3|4|5|6|7|8|9|10|11|12)\s(a|p|am|pm|AM|PM)$':'%I:00 %p',
+            r'^0?(1|2|3|4|5|6|7|8|9|10|11|12)(a|p|am|pm|AM|PM)$':'%I:00%p',
+            r'^[0-9]{1,2}:\d\d$':'%H:%M',
+            r'^[0-9]{1,2}$':'%H:%M'
+        }
 
-    def parseMissiveID(msg_body):
-        message = re.findall(r'(\d+)', msg_body)
+        # return the strftime format string if found, otherwise empty string (since this is 'falsey')
+        for r in rg_dict:
+            print(f'rematch: {re.findall(r, dt)}')
+            print(f'r: {r}')
+            if re.findall(r, dt):
+                print(f'match found {r}')
+                return rg_dict[r]
+            else:
+                print(f'did not match: {r}')
+
+        print('no match found')
+        return ''
+
+    def parseMissiveID(self):
+        message = re.findall(r'(\d+)', self.msg_body)
 
         return message
     
-    def getType(msg_body):
-        if msg_body[0] == '+':
+    def getType(self):
+        if self.msg_body[0] == '+':
             return 'add'
-        if msg_body[0] == '-':
+        if self.msg_body[0] == '-':
             return 'remove'
-        if msg_body[0] == '!':
+        if self.msg_body[0] == '!':
             return 'info'
-        if msg_body[0] == '?':
+        if self.msg_body[0] == '?':
             return 'help'
         else:
             return 'none'
     
-    def requestIsValid(msg_body):
-        if Parser.getType(msg_body) == 'add':
-            if len(Parser.getMessage(msg_body)) > 0 and len(Parser.getRecipients(msg_body)) > 0 and len(Parser.getTimes(msg_body)) > 0:
+    def requestIsValid(self):
+        if self.getType() == 'add':
+            if len(self.getMessage()) > 0 and len(self.getRecipients()) > 0 and len(self.getTimes()) > 0:
                 return True
             else: 
                 return False
-        elif Parser.getType(msg_body) == 'remove':
+        elif self.getType() == 'remove':
             return True
-        elif Parser.getType(msg_body) == 'info':
+        elif self.getType() == 'info':
             return True
-        elif Parser.getType(msg_body) == 'help':
+        elif self.getType() == 'help':
             return True
         else:
             return False
@@ -99,7 +138,7 @@ class CouldNotConvertToDateTimeError(Exception):
     def __str__(self):
         return f'Could not convert "{self.dt_string}" to DateTime.'
 
-p = Parser.getTimes('+ @12:00 "do something" #1231231234')
+p = Parser('+ @14:41 @21:00 "do something" #1231231234').getTimes()
 print(p)
 
 # class ParserInterface(ABC):
