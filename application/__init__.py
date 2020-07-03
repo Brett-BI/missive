@@ -17,4 +17,7 @@ def create_app():
         from . import sms
         app.register_blueprint(sms.sms_bp)
 
+        from . import services
+        app.register_blueprint(services.services_bp)
+
         return app

@@ -5,8 +5,9 @@ from pprint import pprint
 
 from . import sms_bp
 #from .functions.Scheduler import Scheduler
-from .functions.Parser import Parser
-import app
+from application.util.Parser import Parser
+#from application import scheduler
+from application.services.Scheduler import SMSScheduler
 
 @sms_bp.route("/", methods=["GET", "POST"])
 def home():
@@ -48,6 +49,12 @@ def home():
 
 
     #return jsonify(apiResp)
+    s = SMSScheduler()
+    s.addJob(datetime(2020, 7, 2, 22, 39, 0), 'job_1', 3)
+    print('first added.')
+    s.addJob(datetime(2020, 7, 2, 22, 40, 0), 'job_2', 3)
+    print('second added.')
+
     return str(resp)
 
 @sms_bp.route("/t", methods=["GET", "POST"])

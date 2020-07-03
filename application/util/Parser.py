@@ -46,25 +46,19 @@ class Parser():
         # for t in split_times:
         #     times.append(t.strip(' @'))
 
-        print('ALL TIMES:')
-
         return times
     
     def convertStringToDateTime(self, dt: str) -> datetime:
         # regex match dt to a format string
         rg = self.getStrptimeFormatString(dt)
-        print(f'dt: {dt}')
-        print(f'rg: {rg}')
         # apply format string to strftime (or may strptime, whichever one)
         if rg:
             _time = datetime.strptime(dt, rg)
             print(datetime.strptime(dt, rg))
             if (datetime.today().hour >= _time.hour) and (datetime.today().minute >= _time.minute):
-                print('time has past. do it tomorrow.')
                 _dt = datetime(datetime.today().year, datetime.today().month, datetime.today().day, _time.hour, _time.minute, 0) + timedelta(days=1)
                 return _dt
             else:
-                print('there is still time today...')
                 _dt = datetime(datetime.today().year, datetime.today().month, datetime.today().day, _time.hour, _time.minute, 0)
                 return _dt
             #calc hour/day: current day or next day?
@@ -86,15 +80,9 @@ class Parser():
 
         # return the strftime format string if found, otherwise empty string (since this is 'falsey')
         for r in rg_dict:
-            print(f'rematch: {re.findall(r, dt)}')
-            print(f'r: {r}')
             if re.findall(r, dt):
-                print(f'match found {r}')
                 return rg_dict[r]
-            else:
-                print(f'did not match: {r}')
 
-        print('no match found')
         return ''
 
     def parseMissiveID(self):
@@ -138,8 +126,8 @@ class CouldNotConvertToDateTimeError(Exception):
     def __str__(self):
         return f'Could not convert "{self.dt_string}" to DateTime.'
 
-p = Parser('+ @14:41 @21:00 "do something" #1231231234').getTimes()
-print(p)
+#p = Parser('+ @14:41 @21:00 "do something" #1231231234').getTimes()
+#print(p)
 
 # class ParserInterface(ABC):
 #     @staticmethod

@@ -19,17 +19,24 @@ class TimeValidator():
         # will validate times first?
         pass
     
-    def convertStringToTime(time_list: [str]) -> [time]:
+    def isFutureDate(self, dt: datetime) -> bool:
+        if dt > datetime.today():
+            return True
+        return False
+    
+    def convertStringToTime(self, time_list: [str]) -> [time]:
         # check that elements are strings
-        _time_list = []
+        # _time_list = []
 
-        for t in time_list:
-            if not isinstance(t, str):
-                print('Item in time_list is not a string. Cannot convert to Time object.')
+        # for t in time_list:
+        #     if not isinstance(t, str):
+        #         print('Item in time_list is not a string. Cannot convert to Time object.')
             
-            _time_list.append(time.strptime(t, '%H:%M'))
+        #     _time_list.append(time.strptime(t, '%H:%M'))
         
-        return _time_list
+        # return _time_list
+        pass
 
 
-print(TimeValidator.convertStringToTime(['12:00', '13:00', '15:00']))
+v = TimeValidator()
+print(v.isFutureDate(datetime(2020, 7, 2, 20, 10, 0)))

@@ -123,6 +123,7 @@ pycrypto==2.6.1
 pycurl==7.43.0.1
 pyflakes==1.6.0
 Pygments==2.2.0
+PyJWT==1.7.1
 pylint==1.8.2
 pyodbc==4.0.22
 pyOpenSSL==17.5.0
@@ -130,6 +131,7 @@ pyparsing==2.2.0
 PySocks==1.6.7
 pytest==3.3.2
 python-dateutil==2.8.1
+python-dotenv==0.13.0
 pytz==2020.1
 PyWavelets==0.5.2
 PyYAML==5.3.1
@@ -165,6 +167,7 @@ testpath==0.3.1
 toolz==0.9.0
 tornado==4.5.3
 traitlets==4.3.2
+twilio==6.43.0
 typing==3.6.2
 tzlocal==2.1
 unicodecsv==0.14.1

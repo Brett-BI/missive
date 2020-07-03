@@ -1,6 +1,11 @@
-from app import scheduler
+from datetime import datetime
 
-import app.services.Messager
+from . import services_bp
+from application import scheduler
+
+
+import application.services.Messager
+from application.util.Validator import TimeValidator
 
 '''
     Needs:
@@ -16,15 +21,23 @@ import app.services.Messager
 '''
 
 class SMSScheduler():
-    def addJob(self, times, job_id, missive_id):
+    def printSomething(self, job_id):
+            print(f'something. + {job_id}')
+    
+    def addJob(self, time: datetime, job_id, missive_id):
         # validate the times
-        foreach t in times:
-            valid = TimeValidator.validate(t)
-            if not valid:
-                return False
-
+        c = 0
+        # for t in times:
+        #     valid = TimeValidator().isFutureDate(t)
+        #     print(f'future date: {valid}')
+        #     if not valid:
+        #         return False
+        #     else:
+        #         scheduler.add_job(trigger='date', func=lambda : print(f'reminder: {job_id}'), id='my_job1', run_date=t)  
+        scheduler.add_job(job_id, self.printSomething, args=[job_id], trigger='date', run_date=time)
         # calculate & convert times to datetimes (will be within 24 hours)
-        scheduler.add_job(trigger='date', func=lambda : print(f'reminder: {job_id}'), id='my_job1', run_date=datetime(2020, 6, 11, 18, 38, 0))
+        #scheduler.add_job(trigger='date', func=lambda : print(f'reminder: {job_id}'), id='my_job1', run_date=datetime(2020, 6, 11, 18, 38, 0))
+
 
 class WebScheduler():
     # addJob
