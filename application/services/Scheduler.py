@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from . import services_bp
+# from . import services_bp
 from application import scheduler
 
 
-import application.services.Messager
-from application.util.Validator import TimeValidator
+from application.services.Messager import Messager
+# from application.util.Validator import TimeValidator
 
 '''
     Needs:
@@ -24,9 +24,8 @@ class SMSScheduler():
     def printSomething(self, job_id):
             print(f'something. + {job_id}')
     
-    def addJob(self, time: datetime, job_id, missive_id):
+    def addJob(self, time: datetime, job_id, missive_id, missive):
         # validate the times
-        c = 0
         # for t in times:
         #     valid = TimeValidator().isFutureDate(t)
         #     print(f'future date: {valid}')
@@ -34,10 +33,16 @@ class SMSScheduler():
         #         return False
         #     else:
         #         scheduler.add_job(trigger='date', func=lambda : print(f'reminder: {job_id}'), id='my_job1', run_date=t)  
-        scheduler.add_job(job_id, self.printSomething, args=[job_id], trigger='date', run_date=time)
+        m = Messager()
+        scheduler.add_job(job_id, m.sendMessage, args=[missive['rcp'], missive['msg']], trigger='date', run_date=time)
         # calculate & convert times to datetimes (will be within 24 hours)
         #scheduler.add_job(trigger='date', func=lambda : print(f'reminder: {job_id}'), id='my_job1', run_date=datetime(2020, 6, 11, 18, 38, 0))
 
+# def sayHi():
+#     print('Hello :))')
+
+# s = SMSScheduler()
+# s.addJob(datetime(2020, 7, 3, 20, 59, 0), '1234', 1, sayHi)
 
 class WebScheduler():
     # addJob
@@ -48,7 +53,7 @@ class WebScheduler():
         scheduler.add_job(trigger='date', func=lambda : print('from add_job1'), id='my_job1', run_date=datetime(2020, 6, 11, 18, 38, 0))
 
     # removeJob
-    def removeJob(job_id):
+    def removeJob(self, job_id):
         pass
 
     # updateJob

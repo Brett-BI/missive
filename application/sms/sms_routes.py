@@ -2,12 +2,12 @@ from flask import Flask, jsonify, request
 from datetime import datetime
 from twilio.twiml.messaging_response import MessagingResponse
 from pprint import pprint
+import uuid
 
 from . import sms_bp
-#from .functions.Scheduler import Scheduler
 from application.util.Parser import Parser
-#from application import scheduler
 from application.services.Scheduler import SMSScheduler
+from application.services.Messager import Messager
 
 @sms_bp.route("/", methods=["GET", "POST"])
 def home():
@@ -59,14 +59,29 @@ def home():
 
 @sms_bp.route("/t", methods=["GET", "POST"])
 def test():
-    app.post('/rq', data=dict(body='+ @12:00 "Get coffee" #1234567899'))
+    #app.post('/rq', data=dict(body='+ @12:00 "Get coffee" #1234567899'))
+    pass
 
 @sms_bp.route('/rq')
 def schedule():
-    #rq = request.form['body']
-    rq = '- @12:00 "Get coffee" #1234567899'
-    if Parser.requestIsValid(rq):
-        if Parser.getType(rq) == 'add':
+    rq = request.form['body']
+    #rq = '+ @21:18 "Get coffee" #3216549879'
+    p = Parser(rq)
+    if p.requestIsValid():
+        if p.getType() == 'add':
+            s = SMSScheduler()
+            msg = p.getMessage()
+            rcp = p.getRecipients()
+            times = p.getTimes()
+            #m = Messager().sendMessage(receiver=rcp, msg=msg)        
+
+            for t in times:
+                print('added...')
+                j_id = str(uuid.uuid4())[:8]
+                s.addJob(t, j_id, 1, {'msg':msg, 'rcp':rcp})
+            # store the missive in the DB
+            # schedule the times for the missive
+            #s.addJob()
             return 'add'
         elif Parser.getType(rq) == 'remove':
             return 'remove'
